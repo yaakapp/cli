@@ -190,8 +190,10 @@ get_version_tag() {
 
 # Install the package
 install() {
+  report "VERSION=$VERSION"
   local location="${LOCATION:-$defaultLocation}"
   local version=$(get_version_tag "${VERSION:-$defaultVersion}")
+  report "VERSION2=$version"
   local tmp_dir="$(mktemp -d -t "${projectName}.${appName}.XXXXXXX")"
 
   validate_input "$location" "$version"
@@ -200,7 +202,7 @@ install() {
 
   # Download the archive to a temporary location
   local suffix="$(get_platform_suffix)"
-  local file_name="${appName}_${version:1}_${suffix}"
+  local file_name="${appName}_${version#v}_${suffix}"
   local download_dir="${tmp_dir}/${file_name}@${version}"
 
   mkdir -p "${download_dir}"
