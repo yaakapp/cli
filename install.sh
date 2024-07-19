@@ -1,520 +1,233 @@
-#!/usr/bin/env bash
+#!/bin/bash
+# Copyright MontFerret Team 2023
+# Licensed under the MIT license.
 
-# Adapted from https://github.com/starship/starship/blob/master/install/install.sh
+set -e
 
-help_text="Options
+# Declare constants
+readonly projectName="yaakapp"
+readonly appName="cli"
+readonly binName="yaak-cli"
+readonly fullAppName="${projectName} $(echo ${appName} | awk '{print toupper(substr($0,0,1)) substr($0,2)}')"
+readonly baseUrl="https://github.com/${projectName}/${appName}/releases/download"
 
-   -V, --verbose
-   Enable verbose output for the installer
+# Declare default values
+readonly defaultLocation="${HOME}/.yaakcli"
+readonly defaultVersion="latest"
 
-   -f, -y, --force, --yes
-   Skip the confirmation prompt during installation
-
-   -p, --platform
-   Override the platform identified by the installer
-
-   -b, --bin-dir
-   Override the bin installation directory
-
-   -a, --arch
-   Override the architecture identified by the installer
-
-   -B, --base-url
-   Override the base URL used for downloading releases
-
-   -r, --remove
-   Uninstall yaak-cli
-
-   -h, --help
-   Get some help
-
-"
-
-set -eu
-printf '\n'
-
-BOLD="$(tput bold 2>/dev/null || printf '')"
-GREY="$(tput setaf 0 2>/dev/null || printf '')"
-UNDERLINE="$(tput smul 2>/dev/null || printf '')"
-RED="$(tput setaf 1 2>/dev/null || printf '')"
-GREEN="$(tput setaf 2 2>/dev/null || printf '')"
-YELLOW="$(tput setaf 3 2>/dev/null || printf '')"
-BLUE="$(tput setaf 4 2>/dev/null || printf '')"
-MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
-NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
-
-SUPPORTED_TARGETS="x86_64-unknown-linux-gnu x86_64-unknown-linux-musl \
-                  i686-unknown-linux-musl aarch64-unknown-linux-musl \
-                  arm-unknown-linux-musleabihf x86_64-apple-darwin \
-                  aarch64-apple-darwin x86_64-pc-windows-msvc \
-                  i686-pc-windows-msvc aarch64-pc-windows-msvc \
-                  x86_64-unknown-freebsd"
-
-info() {
-  printf '%s\n' "${BOLD}${GREY}>${NO_COLOR} $*"
+# Print a message to stdout
+report() {
+  command printf "%s\n" "$*" 2>/dev/null
 }
 
-debug() {
-  if [ -n "${VERBOSE}" ]; then
-    printf '%s\n' "${BOLD}${GREY}>${NO_COLOR} $*"
-  fi
+# Check if a command is available
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
 }
 
-warn() {
-  printf '%s\n' "${YELLOW}! $*${NO_COLOR}"
-}
-
-error() {
-  printf '%s\n' "${RED}x $*${NO_COLOR}" >&2
-}
-
-completed() {
-  printf '%s\n' "${GREEN}✓${NO_COLOR} $*"
-}
-
-has() {
-  command -v "$1" 1>/dev/null 2>&1
-}
-
-RANDOM_FOR_SH=$(od -vAn -N4 -tu4 < /dev/urandom | sed 's/\t*$//g')
-
-# Removes leading whitespace
-RANDOM_FOR_SH=$(echo ${RANDOM_FOR_SH:-$RANDOM})
-
-# Gets path to a temporary file, even if
-get_tmpfile() {
-  local suffix
-  suffix="$1"
-  if has mktemp; then
-    printf "%s%s.%s.%s" "$(mktemp)" "-yaak-cli" "${RANDOM_FOR_SH}" "${suffix}"
-  else
-    # No really good options here--let's pick a default + hope
-    printf "/tmp/yaak-cli.%s" "${suffix}"
-  fi
-}
-
-# Test if a location is writeable by trying to write to it. Windows does not let
-# you test writeability other than by writing: https://stackoverflow.com/q/1999988
-test_writeable() {
-  local path
-  path="${1:-}/test.txt"
-  if touch "${path}" 2>/dev/null; then
-    rm "${path}"
-    return 0
-  else
-    return 1
-  fi
-}
-
-download() {
-  file="$1"
-  url="$2"
-  touch "$file"
-
-  if has curl; then
-    cmd="curl --fail --silent --location --output $file $url"
-  elif has wget; then
-    cmd="wget --quiet --output-document=$file $url"
-  elif has fetch; then
-    cmd="fetch --quiet --output=$file $url"
-  else
-    error "No HTTP download program (curl, wget, fetch) found, exiting…"
+# Check if a path exists
+check_path() {
+  if [ -z "${1-}" ] || [ ! -f "${1}" ]; then
     return 1
   fi
 
-  $cmd && return 0 || rc=$?
-
-  error "Command failed (exit code $rc): ${BLUE}${cmd}${NO_COLOR}"
-  printf "\n" >&2
-  info "This is likely due to yaak-cli not yet supporting your configuration."
-  info "If you would like to see a build for your configuration,"
-  info "please create an issue requesting a build for ${MAGENTA}${TARGET}${NO_COLOR}:"
-  info "${BOLD}${UNDERLINE}https://github.com/yaakapp/cli/issues/new/${NO_COLOR}"
-  return $rc
+  report "${1}"
 }
 
-unpack() {
-  local archive=$1
-  local bin_dir=$2
-  local sudo=${3-}
+# Validate user input
+validate_input() {
+  local location="$1"
+  local version="$2"
 
-  case "$archive" in
-    *.tar.gz)
-      flags=$(test -n)
-      ${sudo} tar "${flags}" -xzf "${archive}" -C "${bin_dir}"
-      return 0
-      ;;
-    *.zip)
-      flags=$(test -z)
-      UNZIP="${flags}" ${sudo} unzip "${archive}" -d "${bin_dir}"
-      return 0
-      ;;
-  esac
-
-  error "Unknown package extension."
-  printf "\n"
-  info "This almost certainly results from a bug in this script--please file a"
-  info "bug report at https://github.com/yaakapp/cli/issues"
-  return 1
-}
-
-elevate_priv() {
-  if ! has sudo; then
-    error 'Could not find the command "sudo", needed to get permissions for install.'
-    info "If you are on Windows, please run your shell as an administrator, then"
-    info "rerun this script. Otherwise, please run this script as root, or install"
-    info "sudo."
+  if [ -z "$location" ]; then
+    report "Invalid location: $location"
     exit 1
   fi
-  if ! sudo -v; then
-    error "Superuser not granted, aborting installation"
+
+  # Check if location exists
+  if [ ! -d "$location" ]; then
+    mkdir -p "$location"
+    report "Creating directory: $location"
+  fi
+
+  # Check if location is writable
+  if [ ! -w "$location" ]; then
+    report "Location is not writable: $location"
     exit 1
   fi
-}
 
-install() {
-  local msg
-  local sudo
-  local archive
-  local ext="$1"
+  if [ "$version" != "latest" ]; then
+    # Remove leading 'v' if present
+    version="${version#v}"
 
-  if test_writeable "${BIN_DIR}"; then
-    sudo=""
-    msg="Installing yaak-cli, please wait…"
-  else
-    warn "Escalated permissions are required to install to ${BIN_DIR}"
-    elevate_priv
-    sudo="sudo"
-    msg="Installing yaak-cli as root, please wait…"
-  fi
-  info "$msg"
-
-  archive=$(get_tmpfile "$ext")
-
-  # download to the temp file
-  download "${archive}" "${URL}"
-
-  # unpack the temp file to the bin dir, using sudo if required
-  unpack "${archive}" "${BIN_DIR}" "${sudo}"
-
-  # remove tempfile
-
-  # rm "${archive}"
-}
-
-# Currently supporting:
-#   - win (Git Bash)
-#   - darwin
-#   - linux
-#   - linux_musl (Alpine)
-#   - freebsd
-detect_platform() {
-  local platform
-  platform="$(uname -s | tr '[:upper:]' '[:lower:]')"
-
-  case "${platform}" in
-    msys_nt*) platform="pc-windows-msvc" ;;
-    cygwin_nt*) platform="pc-windows-msvc";;
-    # mingw is Git-Bash
-    mingw*) platform="pc-windows-msvc" ;;
-    # use the statically compiled musl bins on linux to avoid linking issues.
-    linux) platform="unknown-linux-musl" ;;
-    darwin) platform="apple-darwin" ;;
-    freebsd) platform="unknown-freebsd" ;;
-  esac
-
-  printf '%s' "${platform}"
-}
-
-# Currently supporting:
-#   - x86_64
-#   - i386
-detect_arch() {
-  local arch
-  arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
-
-  case "${arch}" in
-    amd64) arch="x86_64" ;;
-    armv*) arch="arm" ;;
-    arm64) arch="aarch64" ;;
-  esac
-
-  # `uname -m` in some cases mis-reports 32-bit OS as 64-bit, so double check
-  if [ "${arch}" = "x86_64" ] && [ "$(getconf LONG_BIT)" -eq 32 ]; then
-    arch=i686
-  elif [ "${arch}" = "aarch64" ] && [ "$(getconf LONG_BIT)" -eq 32 ]; then
-    arch=arm
-  fi
-
-  printf '%s' "${arch}"
-}
-
-detect_target() {
-  local arch="$1"
-  local platform="$2"
-  local target="$arch-$platform"
-
-  if [ "${target}" = "arm-unknown-linux-musl" ]; then
-    target="${target}eabihf"
-  fi
-
-  printf '%s' "${target}"
-}
-
-
-confirm() {
-  if [ -t 0 ]; then
-    if [ -z "${FORCE-}" ]; then
-      printf "%s " "${MAGENTA}?${NO_COLOR} $* ${BOLD}[y/N]${NO_COLOR}"
-      set +e
-      read -r yn </dev/tty
-      rc=$?
-      set -e
-      if [ $rc -ne 0 ]; then
-        error "Error reading from prompt (please re-run with the '--yes' option)"
-        exit 1
-      fi
-      if [ "$yn" != "y" ] && [ "$yn" != "yes" ]; then
-        error 'Aborting (please answer "yes" to continue)'
-        exit 1
-      fi
+    # Check if version is valid using grep
+    if ! echo "$version" | grep -qE "^[0-9]+\.[0-9]+\.[0-9]+$"; then
+      report "Invalid version: $version"
+      exit 1
     fi
   fi
 }
 
-check_bin_dir() {
-  local bin_dir="$1"
+# Detect the profile file
+detect_profile() {
+  local profile=""
+  local detected_profile=""
 
-  if [ ! -d "$BIN_DIR" ]; then
-    error "Installation location $BIN_DIR does not appear to be a directory"
-    info "Make sure the location exists and is a directory, then try again."
-    exit 1
+  if [ "${PROFILE-}" = '/dev/null' ]; then
+    # the user has specifically requested NOT to have nvm touch their profile
+    return
   fi
 
-  # https://stackoverflow.com/a/11655875
-  local good
-  good=$(
-    IFS=:
-    for path in $PATH; do
-      if [ "${path}" = "${bin_dir}" ]; then
-        printf 1
+  if [ -n "${PROFILE}" ] && [ -f "${PROFILE}" ]; then
+    report "${PROFILE}"
+    return
+  fi
+
+  if command_exists bash; then
+    if [ -f "$HOME/.bashrc" ]; then
+      detected_profile="$HOME/.bashrc"
+    elif [ -f "$HOME/.bash_profile" ]; then
+      detected_profile="$HOME/.bash_profile"
+    fi
+  elif command_exists zsh; then
+    if [ -f "$HOME/.zshrc" ]; then
+      detected_profile="$HOME/.zshrc"
+    fi
+  fi
+
+  if [ -z "$detected_profile" ]; then
+    for profile_name in ".profile" ".bashrc" ".bash_profile" ".zshrc"; do
+      if detected_profile="$(check_path "${HOME}/${profile_name}")"; then
         break
       fi
     done
-  )
+  fi
 
-  if [ "${good}" != "1" ]; then
-    warn "Bin directory ${bin_dir} is not in your \$PATH"
+  if [ -n "$detected_profile" ]; then
+    report "$detected_profile"
   fi
 }
 
-is_build_available() {
-  local arch="$1"
-  local platform="$2"
-  local target="$3"
+# Update the profile file
+update_profile() {
+  local location="$1"
+  local profile="$(detect_profile)"
 
-  local good
+  if [[ ":$PATH:" == *":$location:"* ]]; then
+    return
+  fi
 
-  good=$(
-    IFS=" "
-    for t in $SUPPORTED_TARGETS; do
-      if [ "${t}" = "${target}" ]; then
-        printf 1
-        break
-      fi
-    done
-  )
+  report "Updating profile $profile"
 
-  if [ "${good}" != "1" ]; then
-    error "${arch} builds for ${platform} are not yet available for yaak-cli"
-    printf "\n" >&2
-    info "If you would like to see a build for your configuration,"
-    info "please create an issue requesting a build for ${MAGENTA}${target}${NO_COLOR}:"
-    info "${BOLD}${UNDERLINE}https://github.com/yaakapp/cli/issues/new/${NO_COLOR}"
-    printf "\n"
-    exit 1
+  if [ -z "$profile" ]; then
+    report "Profile not found. Tried ${DETECTED_PROFILE-} (as defined in \$PROFILE), ~/.bashrc, ~/.bash_profile, ~/.zshrc, and ~/.profile."
+    report "Append the following lines to the correct file yourself:"
+    report
+    report "export PATH=\$PATH:${location}"
+    report
+  else
+    if ! grep -q "${location}" "$profile"; then
+      report "export PATH=\$PATH:${location}" >>"$profile"
+    fi
   fi
 }
-UNINSTALL=0
-HELP=0
 
-CARGOTOML="$(curl -fsSL https://raw.githubusercontent.com/yaakapp/cli/master/Cargo.toml)"
-ALL_VERSIONS="$(sed -n 's/.*version = "\([^"]*\)".*/\1/p' <<EOH
-"$CARGOTOML"
-EOH
-)"
-IFS=$'\n' read -r VERSION <<EOH
-$ALL_VERSIONS
-EOH
+# Get the platform-specific filename suffix
+get_platform_suffix() {
+  local platform_name="$(uname)"
+  local arch_name="$(uname -m)"
+  local platform=""
+  local arch=""
 
-DEFAULT_VERSION="$VERSION"
-
-
-# defaults
-if [ -z "${YAAK_VERSION-}" ]; then
-  YAAK_VERSION="$DEFAULT_VERSION"
-fi
-
-if [ -z "${YAAK_PLATFORM-}" ]; then
-  PLATFORM="$(detect_platform)"
-fi
-
-if [ -z "${YAAK_BIN_DIR-}" ]; then
-  BIN_DIR=/usr/local/bin
-fi
-
-if [ -z "${YAAK_ARCH-}" ]; then
-  ARCH="$(detect_arch)"
-fi
-
-if [ -z "${YAAK_BASE_URL-}" ]; then
-  BASE_URL="https://github.com/yaakapp/cli/releases"
-fi
-
-# parse argv variables
-while [ "$#" -gt 0 ]; do
-  case "$1" in
-  -p | --platform)
-    PLATFORM="$2"
-    shift 2
+  case "$platform_name" in
+  "Darwin")
+    platform="darwin"
     ;;
-  -b | --bin-dir)
-    BIN_DIR="$2"
-    shift 2
+  "Linux")
+    platform="linux"
     ;;
-  -a | --arch)
-    ARCH="$2"
-    shift 2
+  "Windows")
+    platform="windows"
     ;;
-  -B | --base-url)
-    BASE_URL="$2"
-    shift 2
-    ;;
-
-  -V | --verbose)
-    VERBOSE=1
-    shift 1
-    ;;
-  -f | -y | --force | --yes)
-    FORCE=1
-    shift 1
-    ;;
-  -r | --remove | --uninstall)
-    UNINSTALL=1
-    shift 1
-    ;;
-  -h | --help)
-    HELP=1
-    shift 1
-    ;;
-  -p=* | --platform=*)
-    PLATFORM="${1#*=}"
-    shift 1
-    ;;
-  -b=* | --bin-dir=*)
-    BIN_DIR="${1#*=}"
-    shift 1
-    ;;
-  -a=* | --arch=*)
-    ARCH="${1#*=}"
-    shift 1
-    ;;
-  -B=* | --base-url=*)
-    BASE_URL="${1#*=}"
-    shift 1
-    ;;
-  -V=* | --verbose=*)
-    VERBOSE="${1#*=}"
-    shift 1
-    ;;
-  -f=* | -y=* | --force=* | --yes=*)
-    FORCE="${1#*=}"
-    shift 1
-    ;;
-
   *)
-    error "Unknown option: $1"
+    report "$platform_name is not supported. Exiting..."
     exit 1
     ;;
   esac
-done
 
-# non-empty VERBOSE enables verbose untarring
-if [ -n "${VERBOSE-}" ]; then
-  VERBOSE=v
-else
-  VERBOSE=
-fi
+  case "$arch_name" in
+  "x86_64")
+    arch="_x86_64"
+    ;;
+  "aarch64" | "arm64")
+    arch="_arm64"
+    ;;
+  *)
+    report "$arch_name is not supported. Exiting..."
+    exit 1
+    ;;
+  esac
 
-if [ "$UNINSTALL" = 1 ]; then
-  confirm "Are you sure you want to uninstall yaak-cli?"
+  echo "${platform}${arch}"
+}
 
-  msg=""
-  sudo=""
+get_version_tag() {
+  local version="$1"
 
-  info "REMOVING yaak-cli"
+  if [ "$version" = "latest" ]; then
+    local url="https://api.github.com/repos/${projectName}/${appName}/releases/latest"
 
-  if test_writeable "$(dirname "$(which yaak-cli)")"; then
-    sudo=""
-    msg="Removing yaak-cli, please wait…"
+    curl -sSL "${url}" | grep "tag_name" | cut -d '"' -f 4
   else
-    warn "Escalated permissions are required to install to ${BIN_DIR}"
-    elevate_priv
-    sudo="sudo"
-    msg="Removing yaak-cli as root, please wait…"
-  fi
-
-  info "$msg"
-  ${sudo} rm "$(which yaak-cli)"
-  ${sudo} rm /tmp/yaak-cli
-
-  info "Removed yaak-cli"
-  exit 0
-
- fi
-if [ "$HELP" = 1 ]; then
-    echo "${help_text}"
-    exit 0
-fi
-TARGET="$(detect_target "${ARCH}" "${PLATFORM}")"
-
-is_build_available "${ARCH}" "${PLATFORM}" "${TARGET}"
-
-
-print_configuration () {
-  if [ -n "${VERBOSE}" ]; then
-    printf "  %s\n" "${UNDERLINE}Configuration${NO_COLOR}"
-    debug "${BOLD}Bin directory${NO_COLOR}: ${GREEN}${BIN_DIR}${NO_COLOR}"
-    debug "${BOLD}Platform${NO_COLOR}:      ${GREEN}${PLATFORM}${NO_COLOR}"
-    debug "${BOLD}Arch${NO_COLOR}:          ${GREEN}${ARCH}${NO_COLOR}"
-    debug "${BOLD}Version${NO_COLOR}:       ${GREEN}${YAAK_VERSION}${NO_COLOR}"
-    printf '\n'
+    # Check if the version starts with a 'v'
+    if [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      echo "$version"
+    else
+      echo "v$version"
+    fi
   fi
 }
 
-print_configuration
+# Install the package
+install() {
+  local location="${LOCATION:-$defaultLocation}"
+  local version=$(get_version_tag "${VERSION:-$defaultVersion}")
+  local tmp_dir="$(mktemp -d -t "${projectName}.${appName}.XXXXXXX")"
 
+  validate_input "$location" "$version"
 
-EXT=tar.gz
-if [ "${PLATFORM}" = "pc-windows-msvc" ]; then
-  EXT=zip
-fi
+  report "Installing ${projectName} ${appName} ${version}..."
 
-URL="${BASE_URL}/download/v${YAAK_VERSION}/yaak-cli-v${YAAK_VERSION}-${TARGET}.${EXT}"
-debug "Tarball URL: ${UNDERLINE}${BLUE}${URL}${NO_COLOR}"
-confirm "Install yaak-cli ${GREEN}${YAAK_VERSION}${NO_COLOR} to ${BOLD}${GREEN}${BIN_DIR}${NO_COLOR}?"
-check_bin_dir "${BIN_DIR}"
+  # Download the archive to a temporary location
+  local suffix="$(get_platform_suffix)"
+  local file_name="${appName}_${version:1}_${suffix}"
+  local download_dir="${tmp_dir}/${file_name}@${version}"
 
-install "${EXT}"
+  mkdir -p "${download_dir}"
 
-printf "$MAGENTA"
-  cat <<'EOF'
+  local download_file="${download_dir}/${file_name}.tar.gz"
+  local url="${baseUrl}/${version}/${file_name}.tar.gz"
 
-                      Poof!
+  report "Downloading package $url as $download_file"
 
+  curl -sSL "${url}" | tar xz --directory "${download_dir}"
 
-             Yaak is now installed
-          Run `yaak-cli help` for commands
+  local downloaded_file="${download_dir}/${binName}"
 
-EOF
-printf "$NO_COLOR"
+  report "Copying ${downloaded_file} to ${location}"
+
+  cp "${downloaded_file}" "${location}"
+
+  local executable="${location}/${binName}"
+
+  chmod +x "${executable}"
+
+  update_profile "${location}"
+
+  report "New version of ${fullAppName} installed to ${location}"
+
+  "$executable" version
+}
+
+# Call the main function
+install
