@@ -157,7 +157,7 @@ get_platform_suffix() {
 
   case "$arch_name" in
   "x86_64")
-    arch="_x86_64"
+    arch="_amd64"
     ;;
   "aarch64" | "arm64")
     arch="_arm64"
@@ -177,7 +177,9 @@ get_version_tag() {
   if [ "$version" = "latest" ]; then
     local url="https://api.github.com/repos/${projectName}/${appName}/releases/latest"
 
-    curl -sSL "${url}" | grep "tag_name" | cut -d '"' -f 4
+    release_json=$(curl -sSL "${url}")
+    echo "JSON ${release_json}"
+    echo "${release_json}" | grep "tag_name" | cut -d '"' -f 4
   else
     # Check if the version starts with a 'v'
     if [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
