@@ -1,6 +1,6 @@
 version: 2
 
 builds:
-  - env:
+  - binary: yaak-cli
+    env:
       - CGO_ENABLED=0
-    binary: yaak-cli

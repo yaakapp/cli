@@ -226,7 +226,7 @@ install() {
 
   report "New version of ${fullAppName} installed to ${location}"
 
-  "$executable" version
+#  "$executable" version
 }
 
 # Call the main function
