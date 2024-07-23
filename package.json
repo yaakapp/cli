@@ -1,9 +1,0 @@
-{
-  "name": "@yaakapp/cli",
-  "version": "0.0.1",
-  "goBinary": {
-    "name": "yaakcli",
-    "path": "./bin",
-    "url": "https://github.com/yaakapp/yaakcli/releases/download/v{{version}}/yaakcli_{{version}}_{{platform}}_{{arch}}.tar.gz"
-  }
-}
