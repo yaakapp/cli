@@ -17,30 +17,36 @@ var generateCmd = &cobra.Command{
 
 		_ = defaultPath
 
-		dst, err := pterm.DefaultInteractiveTextInput.WithDefaultValue(defaultPath).Show()
+		pluginDir, err := pterm.DefaultInteractiveTextInput.WithDefaultValue(defaultPath).Show()
 		checkErr(err)
 
-		if dirExists(dst) {
+		if dirExists(pluginDir) {
 			returnError("")
 		}
 
-		pterm.Println("Generating plugin to:", pterm.Magenta(dst))
+		pterm.Println("Generating plugin to:", pterm.Magenta(pluginDir))
 
 		// Create destination directory
-		checkErr(os.MkdirAll(dst, 0755))
+		checkErr(os.MkdirAll(pluginDir, 0755))
 
 		// Copy static files
-		copyFile("package.json", dst, defaultName)
-		copyFile("tsconfig.json", dst, defaultName)
-		copyFile("src/index.ts", dst, defaultName)
+		copyFile("package.json", pluginDir, defaultName)
+		copyFile("tsconfig.json", pluginDir, defaultName)
+		copyFile("src/index.ts", pluginDir, defaultName)
 
-		c := exec.Command("npm", "install")
-		c.Dir = dst
-		c.Stdout = os.Stdout
-		c.Stderr = os.Stderr
-		checkErr(c.Start())
-		checkErr(c.Wait())
+		runCmd(pluginDir, "npm", "install")
+		runCmd(pluginDir, "npm", "install", "@yaakapp/api")
+		runCmd(pluginDir, "npm", "install", "-d", "@yaakapp/cli")
 	},
+}
+
+func runCmd(dir, cmd string, args ...string) {
+	c := exec.Command(cmd, args...)
+	c.Dir = dir
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	checkErr(c.Start())
+	checkErr(c.Wait())
 }
 
 func writeFile(path, contents string) {

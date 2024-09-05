@@ -1,6 +1,6 @@
 {
   "name": "@yaakapp/cli",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "repository": "https://github.com/yaakapp/cli",
   "files": [
     "scripts"
