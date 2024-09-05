@@ -1,7 +1,6 @@
 package yaakcli
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -9,7 +8,7 @@ import (
 func rootCmd(version string) *cobra.Command {
 	var fVersion bool
 	cmd := &cobra.Command{
-		Use:   "plaak",
+		Use:   "yaakcli",
 		Short: "Develop plugins for Yaak",
 		Long:  `Generate, build, and debug plugins for Yaak, the most intuitive desktop API client`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -30,8 +29,5 @@ func rootCmd(version string) *cobra.Command {
 }
 
 func Execute(version string) {
-	if err := rootCmd(version).Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	checkErr(rootCmd(version).Execute())
 }
