@@ -1,7 +1,10 @@
 {
   "name": "@yaakapp/cli",
   "version": "0.0.19",
-  "repository": "https://github.com/yaakapp/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaakapp/cli.git"
+  },
   "files": [
     "scripts"
   ],
