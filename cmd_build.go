@@ -31,7 +31,6 @@ var buildCmd = &cobra.Command{
 		result := api.Build(options)
 		for _, o := range result.OutputFiles {
 			fmt.Printf("Compiled to: %s\n", o.Path)
-			fmt.Fprintf(os.Stderr, "Compiled to: %s\n", o.Path)
 		}
 	},
 }
