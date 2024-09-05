@@ -6,22 +6,31 @@ import (
 	"os"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "plaak",
-	Short: "Develop plugins for Yaak",
-	Long:  `Generate, build, and debug plugins for Yaak, the most intuitive desktop API client`,
-	Run: func(cmd *cobra.Command, args []string) {
-		println("Hello from Plaak")
-	},
+func rootCmd(version string) *cobra.Command {
+	var fVersion bool
+	cmd := &cobra.Command{
+		Use:   "plaak",
+		Short: "Develop plugins for Yaak",
+		Long:  `Generate, build, and debug plugins for Yaak, the most intuitive desktop API client`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if fVersion {
+				println(version)
+				os.Exit(0)
+			}
+
+			checkErr(cmd.Help())
+		},
+	}
+	cmd.AddCommand(buildCmd)
+	cmd.AddCommand(generateCmd)
+
+	cmd.Flags().BoolVar(&fVersion, "version", false, "Source directory to read from")
+
+	return cmd
 }
 
-func init() {
-	rootCmd.AddCommand(buildCmd)
-	rootCmd.AddCommand(generateCmd)
-}
-
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+func Execute(version string) {
+	if err := rootCmd(version).Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

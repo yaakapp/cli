@@ -2,5 +2,6 @@ version: 2
 
 builds:
   - binary: yaakcli
+    main: ./cmd/yaakcli/main.go
     env:
       - CGO_ENABLED=0
