@@ -1,13 +1,12 @@
 {
   "name": "@yaakapp/cli",
-  "version": "0.0.16",
+  "version": "0.0.17",
+  "repository": "https://github.com/yaakapp/cli",
   "files": [
-    "install.cjs",
-    "uninstall.cjs",
-    "bin"
+    "scripts"
   ],
   "scripts": {
-    "postinstall": "node ./install.cjs",
-    "preuninstall": "node ./uninstall.cjs"
+    "postinstall": "node scripts/install.cjs",
+    "preuninstall": "node scripts/uninstall.cjs"
   }
 }
