@@ -1,3 +1,10 @@
+
+# Yaak CLI (`yaakcli`)
+
+This is the CLI for developing [Yaak](https://yaak.app) plugins.
+
+## Installation
+
 ```shell
-bash <(curl -fsSL https://raw.githubusercontent.com/yaakapp/cli/main/install.sh)
+npm install -g @yaakapp/cli
 ```
