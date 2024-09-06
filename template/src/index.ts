@@ -1,12 +1,14 @@
-import {PluginDefinition} from '@yaakapp/api';
+import { PluginDefinition } from "@yaakapp/api";
 
 export const plugin: PluginDefinition = {
-    httpRequestActions: [{
-        key: 'export-curl',
-        label: 'Copy as Curl',
-        icon: 'copy',
-        async onSelect(ctx, args) {
-            console.log("Hello World!");
+    httpRequestActions: [
+        {
+            key: "test-example-plugin",
+            label: "Test Example Plugin",
+            icon: "cake",
+            async onSelect(ctx, args) {
+                ctx.toast.show({ variant: "success", message: "It works, have some cake!" });
+            },
         },
-    }],
+    ],
 };

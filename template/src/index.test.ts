@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
-describe('', () => {
-    test('Exports GET with params', () => {
+import {plugin} from "./index";
 
+describe('Example Plugin', () => {
+    test('Exports plugin object', () => {
+        expect(plugin).toBeTypeOf('object');
     });
 });

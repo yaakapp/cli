@@ -6,7 +6,7 @@ import (
 
 var adjectives = []string{
 	"young", "youthful", "yellow", "yielding", "yappy",
-	"yawning", "yummy", "yucky", "yearly",
+	"yawning", "yummy", "yucky", "yearly", "yester", "yeasty", "yelling",
 }
 
 var nouns = []string{

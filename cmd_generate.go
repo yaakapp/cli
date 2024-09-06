@@ -34,9 +34,12 @@ var generateCmd = &cobra.Command{
 		copyFile("tsconfig.json", pluginDir, defaultName)
 		copyFile("src/index.ts", pluginDir, defaultName)
 
+		primary := pterm.NewStyle(pterm.FgLightWhite, pterm.BgMagenta, pterm.Bold)
+
+		pterm.DefaultHeader.WithBackgroundStyle(primary).Println("Installing npm dependencies...")
 		runCmd(pluginDir, "npm", "install")
 		runCmd(pluginDir, "npm", "install", "@yaakapp/api")
-		runCmd(pluginDir, "npm", "install", "-d", "@yaakapp/cli")
+		runCmd(pluginDir, "npm", "install", "-D", "@yaakapp/cli")
 	},
 }
 
