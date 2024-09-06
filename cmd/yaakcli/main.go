@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/yaakapp/yaakcli"
+	"github.com/yaakapp/cli"
 )
 
 var version = "dev"

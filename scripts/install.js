@@ -77,7 +77,7 @@ async function downloadBinary() {
   // Download the tarball of the right binary distribution package
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
   const arch = process.arch === 'x64' ? 'amd64' : process.arch;
-  const url = `https://github.com/yaakapp/yaakcli/releases/download/v${VERSION}/yaakcli_${VERSION}_${platform}_${arch}.tar.gz`;
+  const url = `https://github.com/yaakapp/cli/releases/download/v${VERSION}/yaakcli_${VERSION}_${platform}_${arch}.tar.gz`;
   console.log(`Downloading ${url}`);
   const tarballDownloadBuffer = await makeRequest(url);
 
