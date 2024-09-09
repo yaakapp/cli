@@ -12,6 +12,7 @@ if (!version) {
   console.log("YAAK_CLI_VERSION not set");
   process.exit(1);
 }
+
 console.log(`Setting package versions to ${version}`);
 replacePackageVersion(join(__dirname, 'cli'), version);
 replacePackageVersion(join(__dirname, 'npm/cli-darwin-arm64'), version);
