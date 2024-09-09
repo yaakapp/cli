@@ -27,5 +27,4 @@ jobs:
       - name: Install yaak CLI
         run: |
           npm install -g @yaakapp/cli
-          npm run build
           yaakcli --version
