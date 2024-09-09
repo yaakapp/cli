@@ -2,7 +2,8 @@ name: CI
 on: push
 
 jobs:
-  do-it:
+  check-installation:
+    name: Check Installation
     strategy:
       fail-fast: false
       matrix:

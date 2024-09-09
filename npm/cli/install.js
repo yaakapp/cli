@@ -34,7 +34,7 @@ function makeRequest(url) {
         } else {
           reject(
             new Error(
-              `npm responded with status code ${response.statusCode} when downloading the package!`
+              `npm responded with status code ${response.statusCode} when downloading the package! ${url}`
             )
           );
         }
@@ -73,8 +73,9 @@ function extractFileFromTarball(tarballBuffer, filepath) {
 
 async function downloadBinaryFromNpm() {
   // Download the tarball of the right binary distribution package
+  const platformSpecificPackageNameWithoutOrg = platformSpecificPackageName.split('/')[1];
   const tarballDownloadBuffer = await makeRequest(
-    `https://registry.npmjs.org/${platformSpecificPackageName}/-/${platformSpecificPackageName}-${BINARY_DISTRIBUTION_VERSION}.tgz`
+    `https://registry.npmjs.org/${platformSpecificPackageName}/-/${platformSpecificPackageNameWithoutOrg}-${BINARY_DISTRIBUTION_VERSION}.tgz`,
   );
 
   const tarballBuffer = zlib.unzipSync(tarballDownloadBuffer);
