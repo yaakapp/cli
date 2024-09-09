@@ -22,8 +22,9 @@ replacePackageVersion(join(__dirname, 'npm/cli-win32-x64'), version);
 
 console.log("Done preparing for publish");
 
-function replacePackageVersion(path, version) {
-  const pkg = JSON.parse(readFileSync(path, 'utf-8'));
+function replacePackageVersion(dir, version) {
+  const filepath = join(dir, 'package.json');
+  const pkg = JSON.parse(readFileSync(filepath, 'utf-8'));
   pkg.version = version;
   if (pkg.name === '@yaakapp/cli') {
     pkg.optionalDependencies = {
@@ -33,5 +34,5 @@ function replacePackageVersion(path, version) {
       "@yaakapp/cli-win32-x64": version,
     }
   }
-  writeFileSync(path, JSON.stringify(pkg, null, 2));
+  writeFileSync(filepath, JSON.stringify(pkg, null, 2));
 }
