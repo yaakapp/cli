@@ -2,6 +2,7 @@
 
 const path = require("path");
 const childProcess = require("child_process");
+const {BINARY_NAME} = require("../common");
 
 // Lookup table for all platforms and binary distribution packages
 const BINARY_DISTRIBUTION_PACKAGES = {
@@ -11,9 +12,6 @@ const BINARY_DISTRIBUTION_PACKAGES = {
   win32: "npm-binary-example-win32",
 };
 
-// Windows binaries end with .exe so we need to special case them.
-const binaryName = process.platform === "win32" ? "my-binary.exe" : "my-binary";
-
 // Determine package name for this platform
 const platformSpecificPackageName =
   BINARY_DISTRIBUTION_PACKAGES[process.platform];
@@ -21,9 +19,9 @@ const platformSpecificPackageName =
 function getBinaryPath() {
   try {
     // Resolving will fail if the optionalDependency was not installed
-    return require.resolve(`${platformSpecificPackageName}/bin/${binaryName}`);
+    return require.resolve(`${platformSpecificPackageName}/bin/${BINARY_NAME}`);
   } catch (e) {
-    return path.join(__dirname, "..", binaryName);
+    return path.join(__dirname, "..", BINARY_NAME);
   }
 }
 
