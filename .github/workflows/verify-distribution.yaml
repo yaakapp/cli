@@ -12,9 +12,6 @@ jobs:
           - platform: 'windows-latest'
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout yaakapp/app
-        uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
