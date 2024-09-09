@@ -1,0 +1,17 @@
+{
+  "name": "@yaakapp/cli",
+  "version": "0.0.23",
+  "main": "./index.js",
+  "scripts": {
+    "postinstall": "node ./install.js"
+  },
+  "bin": {
+    "yaakcli": "bin/cli"
+  },
+  "optionalDependencies": {
+    "@yaakapp/cli-darwin-x64": "0.0.23",
+    "@yaakapp/cli-darwin-arm64": "0.0.23",
+    "@yaakapp/cli-linux-x64": "0.0.23",
+    "@yaakapp/cli-win32-x64": "0.0.23"
+  }
+}

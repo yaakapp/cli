@@ -32,6 +32,23 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm publish --provenance --access public
+
+      - run: node npm/prepare-publish.js
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YAAK_VERSION: ${{ github.ref_name }}
+
+      - run: npm publish --provenance --access public
+        working-directory: npm/cli-binary-darwin-arm64
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
+
+      - run: npm publish --provenance --access public
+        working-directory: npm/cli-binary-darwin-x64
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
+
+      - run: npm publish --provenance --access public
+        working-directory: npm/cli-binary-linux-x64
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
+
+      - run: npm publish --provenance --access public
+        working-directory: npm/cli-binary-win32-x64
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
