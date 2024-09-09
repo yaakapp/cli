@@ -2,11 +2,15 @@
   "name": "@yaakapp/cli",
   "version": "0.0.23",
   "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaakapp/cli.git"
+  },
   "scripts": {
     "postinstall": "node ./install.js"
   },
   "bin": {
-    "yaakcli": "bin/cli"
+    "yaakcli": "bin/cli.js"
   },
   "optionalDependencies": {
     "@yaakapp/cli-darwin-x64": "0.0.23",
