@@ -51,3 +51,7 @@ jobs:
       - run: npm publish --provenance --access public
         working-directory: npm/cli-win32-x64
         env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
+
+      - run: npm publish --provenance --access public
+        working-directory: npm/cli
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }

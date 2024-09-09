@@ -6,4 +6,7 @@ const BINARY_DISTRIBUTION_PACKAGES = {
   win32_x64: "@yaakapp/cli-win32-x64",
 };
 
-module.exports = {BINARY_DISTRIBUTION_PACKAGES};
+// Adjust the version you want to install. You can also make this dynamic.
+const BINARY_DISTRIBUTION_VERSION = require('./package.json').version;
+
+module.exports = {BINARY_DISTRIBUTION_PACKAGES, BINARY_DISTRIBUTION_VERSION};

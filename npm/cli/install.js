@@ -2,10 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const https = require("https");
-const {BINARY_DISTRIBUTION_PACKAGES} = require("./common");
-
-// Adjust the version you want to install. You can also make this dynamic.
-const BINARY_DISTRIBUTION_VERSION = require('./package.json').version;
+const {BINARY_DISTRIBUTION_PACKAGES, BINARY_DISTRIBUTION_VERSION} = require("./common");
 
 // Windows binaries end with .exe so we need to special case them.
 const binaryName = process.platform === "win32" ? "yaakcli.exe" : "yaakcli";
