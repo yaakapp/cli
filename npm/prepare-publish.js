@@ -2,8 +2,8 @@ const {copyFileSync, readFileSync, writeFileSync} = require("node:fs");
 const {join} = require("node:path");
 
 console.log("Copying binary files to packages")
-copyFileSync(join(__dirname, '../dist/cli_darwin_amd64_v1/yaakcli'), join(__dirname, 'cli-darwin-arm64/bin/yaakcli'));
-copyFileSync(join(__dirname, '../dist/cli_darwin_arm64/yaakcli'), join(__dirname, 'cli-darwin-x64/bin/yaakcli'));
+copyFileSync(join(__dirname, '../dist/cli_darwin_arm64/yaakcli'), join(__dirname, 'cli-darwin-arm64/bin/yaakcli'));
+copyFileSync(join(__dirname, '../dist/cli_darwin_amd64_v1/yaakcli'), join(__dirname, 'cli-darwin-x64/bin/yaakcli'));
 copyFileSync(join(__dirname, '../dist/cli_linux_amd64_v1/yaakcli'), join(__dirname, 'cli-linux-x64/bin/yaakcli'));
 copyFileSync(join(__dirname, '../dist/cli_windows_amd64_v1/yaakcli.exe'), join(__dirname, 'cli-win32-x64/bin/yaakcli.exe'));
 
