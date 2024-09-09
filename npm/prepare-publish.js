@@ -1,10 +1,10 @@
-const {copySync, readFileSync, writeFileSync} = require("node:fs");
+const {copyFileSync, readFileSync, writeFileSync} = require("node:fs");
 
 console.log("Copying binary files to packages")
-copySync('dist/cli_darwin_arm64/yaakcli', 'npm/cli-darwin-x64/bin/yaakcli');
-copySync('dist/cli_darwin_amd64_v1/yaakcli', 'npm/cli-darwin-arm64/bin/yaakcli');
-copySync('dist/cli_linux_amd64_v1/yaakcli', 'npm/cli-linux-x64/bin/yaakcli');
-copySync('dist/cli_windows_amd64_v1/yaakcli.exe', 'npm/cli-win32-x64/bin/yaakcli.exe');
+copyFileSync('dist/cli_darwin_arm64/yaakcli', 'npm/cli-darwin-x64/bin/yaakcli');
+copyFileSync('dist/cli_darwin_amd64_v1/yaakcli', 'npm/cli-darwin-arm64/bin/yaakcli');
+copyFileSync('dist/cli_linux_amd64_v1/yaakcli', 'npm/cli-linux-x64/bin/yaakcli');
+copyFileSync('dist/cli_windows_amd64_v1/yaakcli.exe', 'npm/cli-win32-x64/bin/yaakcli.exe');
 
 const version = process.env.YAAK_CLI_VERSINO
 console.log(`Setting package versions to ${version}`);
