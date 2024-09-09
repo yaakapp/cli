@@ -1,13 +1,16 @@
-import { PluginDefinition } from "@yaakapp/api";
+import {PluginDefinition} from "@yaakapp/api";
 
 export const plugin: PluginDefinition = {
     httpRequestActions: [
         {
-            key: "test-example-plugin",
-            label: "Test Example Plugin",
+            key: "example-plugin",
+            label: "Hello, From Plugin",
             icon: "cake",
             async onSelect(ctx, args) {
-                ctx.toast.show({ variant: "success", message: "It works, have some cake!" });
+                ctx.toast.show({
+                    variant: "success",
+                    message: `You clicked the request ${args.httpRequest.id}`
+                });
             },
         },
     ],

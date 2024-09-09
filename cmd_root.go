@@ -10,16 +10,17 @@ func rootCmd(version string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "yaakcli",
 		Short: "Develop plugins for Yaak",
-		Long:  `Generate, build, and debug plugins for Yaak, the most intuitive desktop API client`,
+		Long:  "Generate, build, and debug plugins for Yaak, the most intuitive desktop API client",
 		Run: func(cmd *cobra.Command, args []string) {
 			if fVersion {
 				println(version)
 				os.Exit(0)
 			}
 
-			checkErr(cmd.Help())
+			CheckError(cmd.Help())
 		},
 	}
+	cmd.AddCommand(devCmd)
 	cmd.AddCommand(buildCmd)
 	cmd.AddCommand(generateCmd)
 
@@ -29,5 +30,5 @@ func rootCmd(version string) *cobra.Command {
 }
 
 func Execute(version string) {
-	checkErr(rootCmd(version).Execute())
+	CheckError(rootCmd(version).Execute())
 }
