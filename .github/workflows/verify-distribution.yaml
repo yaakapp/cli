@@ -2,8 +2,7 @@ name: CI
 on: push
 
 jobs:
-  verify-distribution:
-    name: Verify Distribution
+  do-it:
     strategy:
       fail-fast: false
       matrix:
@@ -21,10 +20,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Yaak CLI
+        run: npm install --foreground-scripts -g @yaakapp/cli
 
-      - name: Install yaak CLI
-        run: |
-          npm install -g @yaakapp/cli
-          yaakcli --version
+      - name: Verify the Yaak CLI
+        run: yaakcli --version
