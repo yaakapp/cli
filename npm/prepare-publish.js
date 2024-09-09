@@ -14,7 +14,7 @@ if (!version) {
 }
 
 console.log(`Setting package versions to ${version}`);
-replacePackageVersion(join(__dirname, 'cli'), version);
+replacePackageVersion(join(__dirname, 'npm/cli'), version);
 replacePackageVersion(join(__dirname, 'npm/cli-darwin-arm64'), version);
 replacePackageVersion(join(__dirname, 'npm/cli-darwin-x64'), version);
 replacePackageVersion(join(__dirname, 'npm/cli-linux-x64'), version);
