@@ -7,7 +7,7 @@ copyFileSync(join(__dirname, '../dist/cli_darwin_amd64_v1/yaakcli'), join(__dirn
 copyFileSync(join(__dirname, '../dist/cli_linux_amd64_v1/yaakcli'), join(__dirname, 'cli-linux-x64/bin/yaakcli'));
 copyFileSync(join(__dirname, '../dist/cli_windows_amd64_v1/yaakcli.exe'), join(__dirname, 'cli-win32-x64/bin/yaakcli.exe'));
 
-const version = process.env.YAAK_CLI_VERSION
+const version = process.env.YAAK_CLI_VERSION?.replace('v', '');
 if (!version) {
   console.log("YAAK_CLI_VERSION not set");
   process.exit(1);
