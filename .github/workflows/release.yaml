@@ -32,6 +32,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Print dir tree
+        run: |
+          npm install -g tree-node-cli
+          tree -L 5 -I "node_modules"
+
       - run: node npm/prepare-publish.js
         env:
           YAAK_VERSION: ${{ github.ref_name }}
