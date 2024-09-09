@@ -7,7 +7,11 @@ copyFileSync(join(__dirname, '../dist/cli_darwin_arm64/yaakcli'), join(__dirname
 copyFileSync(join(__dirname, '../dist/cli_linux_amd64_v1/yaakcli'), join(__dirname, 'cli-linux-x64/bin/yaakcli'));
 copyFileSync(join(__dirname, '../dist/cli_windows_amd64_v1/yaakcli.exe'), join(__dirname, 'cli-win32-x64/bin/yaakcli.exe'));
 
-const version = process.env.YAAK_CLI_VERSINO
+const version = process.env.YAAK_CLI_VERSION
+if (!version) {
+  console.log("YAAK_CLI_VERSION not set");
+  process.exit(1);
+}
 console.log(`Setting package versions to ${version}`);
 replacePackageVersion(join(__dirname, 'cli'), version);
 replacePackageVersion(join(__dirname, 'npm/cli-darwin-arm64'), version);
