@@ -1,6 +1,6 @@
 {
   "name": "@yaakapp/cli",
-  "version": "0.0.23",
+  "version": "0.0.38",
   "main": "./index.js",
   "repository": {
     "type": "git",
@@ -13,9 +13,9 @@
     "yaakcli": "bin/cli.js"
   },
   "optionalDependencies": {
-    "@yaakapp/cli-darwin-x64": "0.0.23",
-    "@yaakapp/cli-darwin-arm64": "0.0.23",
-    "@yaakapp/cli-linux-x64": "0.0.23",
-    "@yaakapp/cli-win32-x64": "0.0.23"
+    "@yaakapp/cli-darwin-x64": "0.0.38",
+    "@yaakapp/cli-darwin-arm64": "0.0.38",
+    "@yaakapp/cli-linux-x64": "0.0.38",
+    "@yaakapp/cli-win32-x64": "0.0.38"
   }
 }

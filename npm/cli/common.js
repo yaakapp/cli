@@ -9,4 +9,16 @@ const BINARY_DISTRIBUTION_PACKAGES = {
 // Adjust the version you want to install. You can also make this dynamic.
 const BINARY_DISTRIBUTION_VERSION = require('./package.json').version;
 
-module.exports = {BINARY_DISTRIBUTION_PACKAGES, BINARY_DISTRIBUTION_VERSION};
+// Windows binaries end with .exe so we need to special case them.
+const BINARY_NAME = process.platform === "win32" ? "yaakcli.exe" : "yaakcli";
+
+// Determine package name for this platform
+const PLATFORM_SPECIFIC_PACKAGE_NAME =
+  BINARY_DISTRIBUTION_PACKAGES[process.platform + '_' + process.arch];
+
+module.exports = {
+  BINARY_DISTRIBUTION_PACKAGES,
+  BINARY_DISTRIBUTION_VERSION,
+  BINARY_NAME,
+  PLATFORM_SPECIFIC_PACKAGE_NAME
+};

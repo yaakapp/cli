@@ -2,17 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const https = require("https");
-const {BINARY_DISTRIBUTION_PACKAGES, BINARY_DISTRIBUTION_VERSION} = require("./common");
-
-// Windows binaries end with .exe so we need to special case them.
-const binaryName = process.platform === "win32" ? "yaakcli.exe" : "yaakcli";
-
-// Determine package name for this platform
-const platformSpecificPackageName =
-  BINARY_DISTRIBUTION_PACKAGES[process.platform];
+const {BINARY_DISTRIBUTION_VERSION, BINARY_NAME, PLATFORM_SPECIFIC_PACKAGE_NAME} = require("./common");
 
 // Compute the path we want to emit the fallback binary to
-const fallbackBinaryPath = path.join(__dirname, binaryName);
+const fallbackBinaryPath = path.join(__dirname, BINARY_NAME);
 
 function makeRequest(url) {
   return new Promise((resolve, reject) => {
@@ -73,7 +66,7 @@ function extractFileFromTarball(tarballBuffer, filepath) {
 
 async function downloadBinaryFromNpm() {
   // Download the tarball of the right binary distribution package
-  const platformSpecificPackageNameWithoutOrg = platformSpecificPackageName.split('/')[1];
+  const platformSpecificPackageNameWithoutOrg = PLATFORM_SPECIFIC_PACKAGE_NAME.split('/')[1];
   const tarballDownloadBuffer = await makeRequest(
     `https://registry.npmjs.org/${platformSpecificPackageName}/-/${platformSpecificPackageNameWithoutOrg}-${BINARY_DISTRIBUTION_VERSION}.tgz`,
   );
@@ -83,7 +76,7 @@ async function downloadBinaryFromNpm() {
   // Extract binary from package and write to disk
   fs.writeFileSync(
     fallbackBinaryPath,
-    extractFileFromTarball(tarballBuffer, `package/bin/${binaryName}`)
+    extractFileFromTarball(tarballBuffer, `package/bin/${BINARY_NAME}`)
   );
 
   // Make binary executable
@@ -93,7 +86,9 @@ async function downloadBinaryFromNpm() {
 function isPlatformSpecificPackageInstalled() {
   try {
     // Resolving will fail if the optionalDependency was not installed
-    require.resolve(`${platformSpecificPackageName}/bin/${binaryName}`);
+    const binPath = `${PLATFORM_SPECIFIC_PACKAGE_NAME}/bin/${BINARY_NAME}`;
+    console.log('Checking if binary is installed', binPath);
+    require.resolve(binPath);
     return true;
   } catch (e) {
     return false;
@@ -105,7 +100,7 @@ if (!isPlatformSpecificPackageInstalled()) {
   console.log(
     "Platform specific package not found. Will manually download binary."
   );
-  downloadBinaryFromNpm();
+  downloadBinaryFromNpm().catch(console.error);
 } else {
   console.log(
     "Platform specific package already installed. Will fall back to manually downloading binary."
