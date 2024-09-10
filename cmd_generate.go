@@ -5,8 +5,6 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 )
 
 var generateCmd = &cobra.Command{
@@ -21,7 +19,7 @@ var generateCmd = &cobra.Command{
 		pluginDir, err := pterm.DefaultInteractiveTextInput.WithDefaultValue(defaultPath).Show()
 		CheckError(err)
 
-		if dirExists(pluginDir) {
+		if fileExists(pluginDir) {
 			returnError("")
 		}
 
@@ -53,30 +51,6 @@ func runCmd(dir, cmd string, args ...string) {
 	c.Stderr = os.Stderr
 	CheckError(c.Start())
 	CheckError(c.Wait())
-}
-
-func writeFile(path, contents string) {
-	CheckError(os.MkdirAll(filepath.Dir(path), 0755))
-	CheckError(os.WriteFile(path, []byte(contents), 0755))
-}
-
-func readFile(path string) string {
-	pkgBytes, err := TemplateFS.ReadFile(path)
-	CheckError(err)
-	return string(pkgBytes)
-}
-
-func copyFile(relPath, dstDir, name string) {
-	contents := readFile(filepath.Join("template", relPath))
-	contents = strings.ReplaceAll(contents, "yaak-plugin-name", name)
-	writeFile(filepath.Join(dstDir, relPath), contents)
-}
-
-func dirExists(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-	return true
 }
 
 func returnError(msg string) {
