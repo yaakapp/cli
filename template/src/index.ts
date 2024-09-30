@@ -8,7 +8,7 @@ export const plugin: PluginDefinition = {
             icon: "cake",
             async onSelect(ctx, args) {
                 ctx.toast.show({
-                    variant: "success",
+                    color: "success",
                     message: `You clicked the request ${args.httpRequest.id}`
                 });
             },
